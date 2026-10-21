@@ -1,4 +1,4 @@
-import os, argparse, random
+import argparse, os, json, random, time
 import numpy as np
 import torch
 import torch.nn as nn
@@ -47,6 +47,7 @@ def main():
     ap.add_argument("--seed", type=int, default=42)
     ap.add_argument("--out", type=str, default="runs/day01")
     args = ap.parse_args()
+    losses = []
 
     set_seed(args.seed)
     device = get_device()
@@ -77,6 +78,7 @@ def main():
             out = model(x)
             loss = criterion(out, y)
             loss.backward()
+            losses.append(loss.item())
             opt.step()
             running += loss.item()
         final_loss = running / len(train_loader)
@@ -91,7 +93,10 @@ def main():
         "final_loss": final_loss,
     }, os.path.join(args.out, "ckpt.pt"))
     print("SAVED", os.path.join(args.out, "ckpt.pt"), "loss=", round(final_loss, 4))
-
+    os.makedirs("docs", exist_ok=True)
+    with open("docs/loss_curve.json", "w") as f:
+        json.dump({"losses": losses, "final_loss": final_loss}, f)
+    print(f"SAVED docs/loss_curve.json  ({len(losses)} batches)")
 
 if __name__ == "__main__":
     main()
