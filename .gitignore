@@ -1,0 +1,9 @@
+.venv/
+runs/
+data/
+__pycache__/
+*.pyc
+*.pyo
+.env
+*.pt
+*.log
